@@ -9,6 +9,7 @@ use Acme\OfferSet;
 use Acme\Product;
 use Acme\ProductCatalogue;
 use Acme\ProductNotFoundException;
+use Acme\SecondProductHalfPriceOffer;
 use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertInstanceOf;
 
@@ -72,26 +73,6 @@ class BasketTest extends TestCase
       self::assertEquals(($product->getPriceInCents() + $product->getPriceInCents()) / 100, $basket->total());
   }
 
-    /**
-     * @dataProvider DeliveryCostDataProvider
-     * @throws ProductNotFoundException
-     */
-    final public function testTotalCostIncludingDeliveryCost(
-        DeliveryRuleSet $deliveryRuleSet,
-        Product         $product,
-        float           $expectedTotal
-    ): void
-    {
-        $catalogue = new ProductCatalogue();
-        $catalogue->addProdut($product);
-        $offerSet = new OfferSet();
-
-        $basket = new Basket($catalogue, $deliveryRuleSet, $offerSet);
-        $basket->add($product->getCode());
-
-        self::assertEquals($expectedTotal, $basket->total());
-    }
-
     public function DeliveryCostDataProvider(): array
     {
         $deliveryRuleSet = new DeliveryRuleSet();
@@ -115,5 +96,41 @@ class BasketTest extends TestCase
                 (9999) / 100
             ]
         ];
+    }
+
+    /**
+     * @dataProvider DeliveryCostDataProvider
+     * @throws ProductNotFoundException
+     */
+    final public function testTotalCostIncludingDeliveryCost(
+        DeliveryRuleSet $deliveryRuleSet,
+        Product         $product,
+        float           $expectedTotal
+    ): void
+    {
+        $catalogue = new ProductCatalogue();
+        $catalogue->addProdut($product);
+        $offerSet = new OfferSet();
+
+        $basket = new Basket($catalogue, $deliveryRuleSet, $offerSet);
+        $basket->add($product->getCode());
+
+        self::assertEquals($expectedTotal, $basket->total());
+    }
+
+    final public function testTotalCostWithAnOffer(): void
+    {
+        $product = new Product('R01', 32.95);
+        $catalogue = new ProductCatalogue();
+        $catalogue->addProdut($product);
+        $deliveryRuleSet = new DeliveryRuleSet();
+        $offerSet = new OfferSet();
+        $offerSet->addOffer(new SecondProductHalfPriceOffer());
+
+        $basket = new Basket($catalogue, $deliveryRuleSet, $offerSet);
+        $basket->add($product->getCode());
+        $basket->add($product->getCode());
+
+        self::assertEquals(($product->getPriceInCents() + $product->getPriceInCents() / 2) / 100, $basket->total());
     }
 }

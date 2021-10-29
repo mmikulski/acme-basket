@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Acme\Basket;
 
 use Acme\DeliveryRuleSet;
+use Acme\NoApplicableOfferException;
 use Acme\OfferSet;
 use Acme\Product;
 use Acme\ProductCatalogue;
@@ -60,9 +61,13 @@ class Basket
      */
     private function calculateProductsTotal(): int
     {
-        return array_reduce($this->getProducts(), static function (int $carry, Product $product) {
+        try {
+            $this->offerSet->calculateProductsTotal($this->getProducts());
+        } catch (NoApplicableOfferException $exception) {
+            return array_reduce($this->getProducts(), static function (int $carry, Product $product) {
                 return $carry + $product->getPriceInCents();
             }, 0);
+        }
     }
 
     private function calculateTotal(): int

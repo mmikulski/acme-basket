@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Acme;
 
-class ProductOffer
+interface ProductOffer
 {
 
+    public function calculateProductsTotal(array $products);
 }
