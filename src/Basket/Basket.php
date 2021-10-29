@@ -52,8 +52,23 @@ class Basket
 
     public function total(): float
     {
+        return $this->calculateTotal() / 100;
+    }
+
+    /**
+     * @return int
+     */
+    private function calculateProductsTotal(): int
+    {
         return array_reduce($this->getProducts(), static function (int $carry, Product $product) {
-            return $carry + $product->getPriceInCents();
-        }, 0) / 100;
+                return $carry + $product->getPriceInCents();
+            }, 0);
+    }
+
+    private function calculateTotal(): int
+    {
+        $productsTotal = $this->calculateProductsTotal();
+
+        return $productsTotal + $this->deliveryRuleSet->calculateDeliveryCost($productsTotal);
     }
 }
