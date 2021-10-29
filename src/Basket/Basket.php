@@ -18,7 +18,7 @@ class Basket
     /**
      * @var array|Product[]
      */
-    private array $products;
+    private array $products = [];
 
     /**
      * @param ProductCatalogue $catalogue
@@ -48,5 +48,12 @@ class Basket
     public function getProducts(): array
     {
         return $this->products;
+    }
+
+    public function total(): float
+    {
+        return array_reduce($this->getProducts(), static function (int $carry, Product $product) {
+            return $carry + $product->getPriceInCents();
+        }, 0) / 100;
     }
 }

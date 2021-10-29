@@ -30,7 +30,7 @@ class ProductCatalogue
         return $this->getProducts()[$productCode];
     }
 
-    public function add(Product $product): void
+    public function addProdut(Product $product): void
     {
         $this->products[$product->getCode()] = $product;
     }
