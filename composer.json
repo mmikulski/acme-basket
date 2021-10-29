@@ -1,0 +1,21 @@
+{
+    "name": "mmikulski/acme-basket",
+    "description": "Coding exercise",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Acme\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Maciej Mikulski",
+            "email": "maciej.mikulski@sparklab.pl"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    }
+}
