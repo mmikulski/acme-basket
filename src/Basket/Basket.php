@@ -4,31 +4,25 @@ declare(strict_types=1);
 
 namespace Acme\Basket;
 
-use Acme\DeliveryRule;
+use Acme\DeliveryRuleSet;
+use Acme\OfferSet;
 use Acme\ProductCatalogue;
-use Acme\ProductOffer;
 
 class Basket
 {
     private ProductCatalogue $catalogue;
-    /**
-     * @var array|DeliveryRule[]
-     */
-    private array $deliveryRules;
-    /**
-     * @var array|ProductOffer[]
-     */
-    private array $offers;
+    private DeliveryRuleSet $deliveryRuleSet;
+    private OfferSet $offerSet;
 
     /**
      * @param ProductCatalogue $catalogue
-     * @param array $deliveryRules|DeliveryRule[]
-     * @param array $offers|Offer[]
+     * @param DeliveryRuleSet $deliveryRuleSet
+     * @param OfferSet $offerSet
      */
-    public function __construct(ProductCatalogue $catalogue, array $deliveryRules, array $offers)
+    public function __construct(ProductCatalogue $catalogue, DeliveryRuleSet $deliveryRuleSet, OfferSet $offerSet)
     {
         $this->catalogue = $catalogue;
-        $this->deliveryRules = $deliveryRules;
-        $this->offers = $offers;
+        $this->deliveryRuleSet = $deliveryRuleSet;
+        $this->offerSet = $offerSet;
     }
 }
