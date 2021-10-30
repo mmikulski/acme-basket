@@ -133,4 +133,58 @@ class BasketTest extends TestCase
 
         self::assertEquals(($product->getPriceInCents() + round($product->getPriceInCents() / 2)) / 100, $basket->total());
     }
+
+    /**
+     * @dataProvider expectedTotalsTestDataProvider
+     * @throws ProductNotFoundException
+     */
+    final public function testTotalCostWithDeliveryAndOffer(Basket $basket, array $productCodes, float $expectedTotal): void
+    {
+        foreach ($productCodes as $productCode) {
+            $basket->add($productCode);
+        }
+
+        self::assertEquals($expectedTotal, $basket->total());
+    }
+
+    public function expectedTotalsTestDataProvider(): array
+    {
+        $redWidget = new Product('R01', 32.95);
+        $greenWidget = new Product('G01', 24.95);
+        $blueWidget = new Product('B01', 7.95);
+        $catalogue = new ProductCatalogue();
+        $catalogue->addProdut($redWidget);
+        $catalogue->addProdut($greenWidget);
+        $catalogue->addProdut($blueWidget);
+        $deliveryRuleSet = new DeliveryRuleSet();
+        $deliveryRuleSet->addRule(new DeliveryRule((int)(4.95 * 100), 0, 5000));
+        $deliveryRuleSet->addRule(new DeliveryRule((int)(2.95 * 100), 5001, 9000));
+        $deliveryRuleSet->addRule(new DeliveryRule(0, 9001, PHP_INT_MAX));
+
+        $offerSet = new OfferSet();
+        $offerSet->addOffer(new SecondProductHalfPriceOffer());
+
+        return [
+            [
+                new Basket($catalogue, $deliveryRuleSet, $offerSet),
+                ['B01', 'G01'],
+                37.85
+            ],
+            [
+                new Basket($catalogue, $deliveryRuleSet, $offerSet),
+                ['R01', 'R01'],
+                54.37
+            ],
+            [
+                new Basket($catalogue, $deliveryRuleSet, $offerSet),
+                ['R01', 'G01'],
+                60.85
+            ],
+            [
+                new Basket($catalogue, $deliveryRuleSet, $offerSet),
+                ['B01', 'B01', 'R01', 'R01', 'R01'],
+                98.27
+            ]
+        ];
+    }
 }
