@@ -34,3 +34,8 @@ Run tests:
 - Currency rounding is then on each operation separately, using default rounding strategy which is called 'away from 
   zero' and is considered a commercial rounding applicable to currency. That lead to test results different from 
   expected in 2 cases.
+- "Manual" calculations were replaced with the Money object's methods still not giving the same results as expected. 
+  That is caused by a different division and rounding method. Assignment authors assumed that anything after decimal 
+  point in result of operation on cents should be discarded while I initially assumed that it should be rounded. 
+  Same assumption seems to be made by authors of the Money library I have used. Differences in the calculation can 
+  be seen in the BasketTest@testDivision test.

@@ -189,4 +189,11 @@ class BasketTest extends TestCase
             ]
         ];
     }
+
+    public function testDivision(): void
+    {
+        self::assertEquals(Money::USD(3295)->divide(2), Money::USD((int)round(3295/2)));
+        self::assertEquals(Money::USD(3295)->divide(2), Money::USD(intdiv(3295,2)));
+        self::assertEquals(Money::USD(3295)->divide(2), Money::USD((int)(3295/2)));
+    }
 }
