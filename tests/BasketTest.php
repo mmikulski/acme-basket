@@ -131,6 +131,6 @@ class BasketTest extends TestCase
         $basket->add($product->getCode());
         $basket->add($product->getCode());
 
-        self::assertEquals(($product->getPriceInCents() + $product->getPriceInCents() / 2) / 100, $basket->total());
+        self::assertEquals(($product->getPriceInCents() + round($product->getPriceInCents() / 2)) / 100, $basket->total());
     }
 }

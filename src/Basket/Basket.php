@@ -62,7 +62,7 @@ class Basket
     private function calculateProductsTotal(): int
     {
         try {
-            $this->offerSet->calculateProductsTotal($this->getProducts());
+            return $this->offerSet->calculateProductsTotal($this->getProducts());
         } catch (NoApplicableOfferException $exception) {
             return array_reduce($this->getProducts(), static function (int $carry, Product $product) {
                 return $carry + $product->getPriceInCents();
