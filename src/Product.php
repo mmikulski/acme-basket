@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Acme;
 
+use Money\Money;
+
 class Product
 {
     private string $code;
-    private int $priceInCents;
+    private Money $price;
 
     /**
      * @param string $code
-     * @param float $priceInCents
+     * @param Money $price
      */
-    public function __construct(string $code, float $priceInCents)
+    public function __construct(string $code, Money $price)
     {
         $this->code = $code;
-        $this->priceInCents = (int) ($priceInCents * 100);
+        $this->price = $price;
     }
 
     public function getCode(): string
@@ -24,8 +26,8 @@ class Product
         return $this->code;
     }
 
-    public function getPriceInCents(): int
+    public function getPrice(): Money
     {
-        return $this->priceInCents;
+        return $this->price;
     }
 }

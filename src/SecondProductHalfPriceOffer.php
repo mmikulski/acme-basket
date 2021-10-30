@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Acme;
 
+use Money\Money;
+
 class SecondProductHalfPriceOffer implements ProductOffer
 {
     private string $productCode;
@@ -13,20 +15,17 @@ class SecondProductHalfPriceOffer implements ProductOffer
         $this->productCode = $productCode;
     }
 
-    public function calculateProductsTotal(array $productAndAmount): int
+    public function calculateProductsTotal(array $productAndAmount): Money
     {
-        $totalCost = 0;
+        $totalCost = Money::USD(0);
         assert($productAndAmount[0] instanceof Product);
         if ($productAndAmount[0]->getCode() !== $this->productCode) {
             throw new IncorrectProductCodeException();
         }
 
-        $totalCost += ($this->countFullPriceProducts($productAndAmount[1]) *
-                $productAndAmount[0]->getPriceInCents()) +
-            ($this->countHalfPriceProducts($productAndAmount[1]) *
-                (int)round($productAndAmount[0]->getPriceInCents() / 2));
-
-        return $totalCost;
+        return $totalCost->add(
+            $productAndAmount[0]->getPrice()->multiply($this->countFullPriceProducts($productAndAmount[1])))->add($productAndAmount[0]->getPrice()->divide(2)->multiply($this->countHalfPriceProducts($productAndAmount[1]))
+        );
     }
 
     /**

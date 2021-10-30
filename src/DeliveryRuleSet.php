@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Acme;
 
+use Money\Money;
+
 class DeliveryRuleSet
 {
 
@@ -17,19 +19,20 @@ class DeliveryRuleSet
         $this->rules[] = $deliveryRule;
     }
 
-    public function calculateDeliveryCost(int $productsTotal): int
+    public function calculateDeliveryCost(Money $productsTotal): Money
     {
-        return $this->matchApplicableRule($productsTotal)->getPriceInCents();
+        return $this->matchApplicableRule($productsTotal)->getPrice();
     }
 
-    private function matchApplicableRule(int $productsTotal): DeliveryRule
+    private function matchApplicableRule(Money $productsTotal): DeliveryRule
     {
         foreach ($this->rules as $rule) {
             assert($rule instanceof DeliveryRule);
-            if ($productsTotal >= $rule->getLowerBoundary() && $productsTotal <= $rule->getUpperBoundary()) {
+            if ($productsTotal->greaterThanOrEqual($rule->getLowerBoundary()) && $productsTotal->lessThanOrEqual(
+                    $rule->getUpperBoundary())) {
                 return $rule;
             }
         }
-        return new DeliveryRule(0, -1, -1);
+        return new DeliveryRule(Money::USD(0), Money::USD(-1), Money::USD(-1));
     }
 }

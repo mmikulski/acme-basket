@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Acme;
 
+use Money\Money;
 
 class NullOffer implements ProductOffer
 {
@@ -17,9 +18,9 @@ class NullOffer implements ProductOffer
         $this->productCode = $productCode;
     }
 
-    public function calculateProductsTotal(array $productAndAmount): int
+    public function calculateProductsTotal(array $productAndAmount): Money
     {
-        return $productAndAmount[0]->getPriceInCents() * $productAndAmount[1];
+        return $productAndAmount[0]->getPrice()->multiply($productAndAmount[1]);
     }
 
     public function getProductCode(): string

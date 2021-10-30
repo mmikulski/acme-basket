@@ -10,6 +10,7 @@ use Acme\Product;
 use Acme\ProductCatalogue;
 use Acme\ProductNotFoundException;
 use Acme\SecondProductHalfPriceOffer;
+use Money\Money;
 use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertInstanceOf;
 
@@ -30,7 +31,7 @@ class BasketTest extends TestCase
      */
     final public function testAddMethodAcceptsProductCode(): void
   {
-      $product = new Product('R01', 32.95);
+      $product = new Product('R01', Money::USD(3295));
       $catalogue = new ProductCatalogue();
       $catalogue->addProdut($product);
       $deliveryRuleSet = new DeliveryRuleSet();
@@ -47,7 +48,7 @@ class BasketTest extends TestCase
      */
     final public function testAddMethodThrowsOnIncorrectCode(): void
   {
-      $product = new Product('R01', 32.95);
+      $product = new Product('R01', Money::USD(3295));
       $catalogue = new ProductCatalogue();
       $deliveryRuleSet = new DeliveryRuleSet();
       $offerSet = new OfferSet();
@@ -60,7 +61,7 @@ class BasketTest extends TestCase
 
   final public function testTotalCostReturnsSumOfProductPrices(): void
   {
-      $product = new Product('R01', 32.95);
+      $product = new Product('R01', Money::USD(3295));
       $catalogue = new ProductCatalogue();
       $catalogue->addProdut($product);
       $deliveryRuleSet = new DeliveryRuleSet();
@@ -70,30 +71,30 @@ class BasketTest extends TestCase
       $basket->add($product->getCode());
       $basket->add($product->getCode());
 
-      self::assertEquals(($product->getPriceInCents() + $product->getPriceInCents()) / 100, $basket->total());
+      self::assertEquals($product->getPrice()->multiply(2), $basket->total());
   }
 
     public function DeliveryCostDataProvider(): array
     {
         $deliveryRuleSet = new DeliveryRuleSet();
-        $deliveryRuleSet->addRule(new DeliveryRule((int)(4.95 * 100), 0, 5000));
-        $deliveryRuleSet->addRule(new DeliveryRule((int)(2.95 * 100), 5001, 9000));
-        $deliveryRuleSet->addRule(new DeliveryRule(0, 9001, PHP_INT_MAX));
+        $deliveryRuleSet->addRule(new DeliveryRule(Money::USD(495), Money::USD(0), Money::USD(5000)));
+        $deliveryRuleSet->addRule(new DeliveryRule(Money::USD(295), Money::USD(5001), Money::USD(9000)));
+        $deliveryRuleSet->addRule(new DeliveryRule(Money::USD(0), Money::USD(9001), Money::USD(PHP_INT_MAX)));
         return [
             [
                 $deliveryRuleSet,
-                new Product('XYZ', 49.99),
-                (4999 + 495) / 100
+                new Product('XYZ', Money::USD(4999)),
+                Money::USD(4999)->add(Money::USD(495))
             ],
             [
                 $deliveryRuleSet,
-                new Product('XYZ', 89.99),
-                (8999 + 295) / 100
+                new Product('XYZ', Money::USD(8999)),
+                Money::USD(8999)->add(Money::USD(295))
             ],
             [
                 $deliveryRuleSet,
-                new Product('XYZ', 99.99),
-                (9999) / 100
+                new Product('XYZ', Money::USD(9999)),
+                Money::USD(9999)
             ]
         ];
     }
@@ -105,7 +106,7 @@ class BasketTest extends TestCase
     final public function testTotalCostIncludingDeliveryCost(
         DeliveryRuleSet $deliveryRuleSet,
         Product         $product,
-        float           $expectedTotal
+        Money           $expectedTotal
     ): void
     {
         $catalogue = new ProductCatalogue();
@@ -120,7 +121,7 @@ class BasketTest extends TestCase
 
     final public function testTotalCostWithAnOffer(): void
     {
-        $product = new Product('R01', 32.95);
+        $product = new Product('R01', Money::USD(3295));
         $catalogue = new ProductCatalogue();
         $catalogue->addProdut($product);
         $deliveryRuleSet = new DeliveryRuleSet();
@@ -131,14 +132,15 @@ class BasketTest extends TestCase
         $basket->add($product->getCode());
         $basket->add($product->getCode());
 
-        self::assertEquals(($product->getPriceInCents() + round($product->getPriceInCents() / 2)) / 100, $basket->total());
+        self::assertEquals($product->getPrice()->add($product->getPrice()->divide(2)), $basket->total());
     }
 
     /**
      * @dataProvider expectedTotalsTestDataProvider
      * @throws ProductNotFoundException
      */
-    final public function testTotalCostWithDeliveryAndOffer(Basket $basket, array $productCodes, float $expectedTotal): void
+    final public function testTotalCostWithDeliveryAndOffer(Basket $basket, array $productCodes, Money $expectedTotal):
+    void
     {
         foreach ($productCodes as $productCode) {
             $basket->add($productCode);
@@ -149,17 +151,17 @@ class BasketTest extends TestCase
 
     public function expectedTotalsTestDataProvider(): array
     {
-        $redWidget = new Product('R01', 32.95);
-        $greenWidget = new Product('G01', 24.95);
-        $blueWidget = new Product('B01', 7.95);
+        $redWidget = new Product('R01', Money::USD(3295));
+        $greenWidget = new Product('G01', Money::USD(2495));
+        $blueWidget = new Product('B01', Money::USD(795));
         $catalogue = new ProductCatalogue();
         $catalogue->addProdut($redWidget);
         $catalogue->addProdut($greenWidget);
         $catalogue->addProdut($blueWidget);
         $deliveryRuleSet = new DeliveryRuleSet();
-        $deliveryRuleSet->addRule(new DeliveryRule((int)(4.95 * 100), 0, 5000));
-        $deliveryRuleSet->addRule(new DeliveryRule((int)(2.95 * 100), 5001, 9000));
-        $deliveryRuleSet->addRule(new DeliveryRule(0, 9001, PHP_INT_MAX));
+        $deliveryRuleSet->addRule(new DeliveryRule(Money::USD(495), Money::USD(0), Money::USD(5000)));
+        $deliveryRuleSet->addRule(new DeliveryRule(Money::USD(295), Money::USD(5001), Money::USD(9000)));
+        $deliveryRuleSet->addRule(new DeliveryRule(Money::USD(0), Money::USD(9001), Money::USD(PHP_INT_MAX)));
 
         $offerSet = new OfferSet();
         $offerSet->addOffer(new SecondProductHalfPriceOffer($redWidget->getCode()));
@@ -168,22 +170,22 @@ class BasketTest extends TestCase
             [
                 new Basket($catalogue, $deliveryRuleSet, $offerSet),
                 ['B01', 'G01'],
-                37.85
+                Money::USD(3785)
             ],
             [
                 new Basket($catalogue, $deliveryRuleSet, $offerSet),
                 ['R01', 'R01'],
-                54.37
+                Money::USD(5437)
             ],
             [
                 new Basket($catalogue, $deliveryRuleSet, $offerSet),
                 ['R01', 'G01'],
-                60.85
+                Money::USD(6085)
             ],
             [
                 new Basket($catalogue, $deliveryRuleSet, $offerSet),
                 ['B01', 'B01', 'R01', 'R01', 'R01'],
-                98.27
+                Money::USD(9827)
             ]
         ];
     }

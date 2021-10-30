@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Acme;
 
+use Money\Money;
+
 class OfferSet
 {
     /**
@@ -20,19 +22,19 @@ class OfferSet
      * @param array $products|Product[]
      * @throws NoApplicableOfferException
      */
-    public function calculateProductsTotal(array $products): int
+    public function calculateProductsTotal(array $products): Money
     {
         if (empty($this->offers)) {
             throw new NoApplicableOfferException();
         }
 
-        $productsTotal = 0;
+        $productsTotal = Money::USD(0);
 
         $productsAndAmounts = $this->productsAndAmountsByKey($products);
 
         foreach ($productsAndAmounts as $productCode => $productAndAmount) {
             $productOffer = $this->getOfferByProductKey($productCode);
-            $productsTotal += $productOffer->calculateProductsTotal($productAndAmount);
+            $productsTotal = $productsTotal->add($productOffer->calculateProductsTotal($productAndAmount));
         }
 
         return $productsTotal;

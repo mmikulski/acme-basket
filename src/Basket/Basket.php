@@ -10,6 +10,7 @@ use Acme\OfferSet;
 use Acme\Product;
 use Acme\ProductCatalogue;
 use Acme\ProductNotFoundException;
+use Money\Money;
 
 class Basket
 {
@@ -51,29 +52,29 @@ class Basket
         return $this->products;
     }
 
-    public function total(): float
+    public function total(): Money
     {
-        return $this->calculateTotal() / 100;
+        return $this->calculateTotal();
     }
 
     /**
-     * @return int
+     * @return Money
      */
-    private function calculateProductsTotal(): int
+    private function calculateProductsTotal(): Money
     {
         try {
             return $this->offerSet->calculateProductsTotal($this->getProducts());
         } catch (NoApplicableOfferException $exception) {
-            return array_reduce($this->getProducts(), static function (int $carry, Product $product) {
-                return $carry + $product->getPriceInCents();
-            }, 0);
+            return array_reduce($this->getProducts(), static function (Money $carry, Product $product) {
+                return $carry->add($product->getPrice());
+            }, Money::USD(0));
         }
     }
 
-    private function calculateTotal(): int
+    private function calculateTotal(): Money
     {
         $productsTotal = $this->calculateProductsTotal();
 
-        return $productsTotal + $this->deliveryRuleSet->calculateDeliveryCost($productsTotal);
+        return $productsTotal->add($this->deliveryRuleSet->calculateDeliveryCost($productsTotal));
     }
 }

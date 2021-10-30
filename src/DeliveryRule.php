@@ -4,36 +4,37 @@ declare(strict_types=1);
 
 namespace Acme;
 
+use Money\Money;
+
 class DeliveryRule
 {
-
-    private int $priceInCents;
-    private int $lowerBoundary;
-    private int $upperBoundary;
+    private Money $price;
+    private Money $lowerBoundary;
+    private Money $upperBoundary;
 
     /**
-     * @param int $priceInCents
-     * @param int $lowerBoundary
-     * @param int $upperBoundary
+     * @param Money $price
+     * @param Money $lowerBoundary
+     * @param Money $upperBoundary
      */
-    public function __construct(int $priceInCents, int $lowerBoundary, int $upperBoundary)
+    public function __construct(Money $price, Money $lowerBoundary, Money $upperBoundary)
     {
-        $this->priceInCents = $priceInCents;
+        $this->price = $price;
         $this->lowerBoundary = $lowerBoundary;
         $this->upperBoundary = $upperBoundary;
     }
 
-    public function getPriceInCents(): int
+    public function getPrice(): Money
     {
-        return $this->priceInCents;
+        return $this->price;
     }
 
-    public function getLowerBoundary(): int
+    public function getLowerBoundary(): Money
     {
         return $this->lowerBoundary;
     }
 
-    public function getUpperBoundary(): int
+    public function getUpperBoundary(): Money
     {
         return $this->upperBoundary;
     }
