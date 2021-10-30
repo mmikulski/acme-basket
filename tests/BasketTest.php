@@ -125,7 +125,7 @@ class BasketTest extends TestCase
         $catalogue->addProdut($product);
         $deliveryRuleSet = new DeliveryRuleSet();
         $offerSet = new OfferSet();
-        $offerSet->addOffer(new SecondProductHalfPriceOffer());
+        $offerSet->addOffer(new SecondProductHalfPriceOffer($product->getCode()));
 
         $basket = new Basket($catalogue, $deliveryRuleSet, $offerSet);
         $basket->add($product->getCode());
@@ -162,7 +162,7 @@ class BasketTest extends TestCase
         $deliveryRuleSet->addRule(new DeliveryRule(0, 9001, PHP_INT_MAX));
 
         $offerSet = new OfferSet();
-        $offerSet->addOffer(new SecondProductHalfPriceOffer());
+        $offerSet->addOffer(new SecondProductHalfPriceOffer($redWidget->getCode()));
 
         return [
             [

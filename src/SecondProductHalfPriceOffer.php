@@ -6,6 +6,12 @@ namespace Acme;
 
 class SecondProductHalfPriceOffer implements ProductOffer
 {
+    private string $productCode;
+
+    public function __construct(string $productCode)
+    {
+        $this->productCode = $productCode;
+    }
 
     public function calculateProductsTotal(array $products): int
     {
@@ -21,12 +27,17 @@ class SecondProductHalfPriceOffer implements ProductOffer
         }
 
         $totalCost = 0;
-        foreach ($productAmounts as $productAndAmount) {
+        foreach ($productAmounts as $productCode => $productAndAmount) {
             assert($productAndAmount[0] instanceof Product);
-            $totalCost += ($this->countFullPriceProducts($productAndAmount[1]) *
-                    $productAndAmount[0]->getPriceInCents()) +
-                ($this->countHalfPriceProducts($productAndAmount[1]) *
-                    (int)round($productAndAmount[0]->getPriceInCents() / 2));
+            if ($productCode === $this->productCode) {
+                $totalCost += ($this->countFullPriceProducts($productAndAmount[1]) *
+                        $productAndAmount[0]->getPriceInCents()) +
+                    ($this->countHalfPriceProducts($productAndAmount[1]) *
+                        (int)round($productAndAmount[0]->getPriceInCents() / 2));
+            } else {
+                $totalCost += $productAndAmount[1] *
+                    $productAndAmount[0]->getPriceInCents();
+            }
         }
 
         return $totalCost;
