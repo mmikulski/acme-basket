@@ -13,32 +13,18 @@ class SecondProductHalfPriceOffer implements ProductOffer
         $this->productCode = $productCode;
     }
 
-    public function calculateProductsTotal(array $products): int
+    public function calculateProductsTotal(array $productAndAmount): int
     {
-        $productAmounts = [];
-
-        foreach ($products as $product) {
-            $code = $product->getCode();
-            if (isset($productAmounts[$code])) {
-                $productAmounts[$code] = [$product, $productAmounts[$code][1] + 1];
-            } else {
-                $productAmounts[$code] = [$product, 1];
-            }
-        }
-
         $totalCost = 0;
-        foreach ($productAmounts as $productCode => $productAndAmount) {
-            assert($productAndAmount[0] instanceof Product);
-            if ($productCode === $this->productCode) {
-                $totalCost += ($this->countFullPriceProducts($productAndAmount[1]) *
-                        $productAndAmount[0]->getPriceInCents()) +
-                    ($this->countHalfPriceProducts($productAndAmount[1]) *
-                        (int)round($productAndAmount[0]->getPriceInCents() / 2));
-            } else {
-                $totalCost += $productAndAmount[1] *
-                    $productAndAmount[0]->getPriceInCents();
-            }
+        assert($productAndAmount[0] instanceof Product);
+        if ($productAndAmount[0]->getCode() !== $this->productCode) {
+            throw new IncorrectProductCodeException();
         }
+
+        $totalCost += ($this->countFullPriceProducts($productAndAmount[1]) *
+                $productAndAmount[0]->getPriceInCents()) +
+            ($this->countHalfPriceProducts($productAndAmount[1]) *
+                (int)round($productAndAmount[0]->getPriceInCents() / 2));
 
         return $totalCost;
     }
@@ -59,5 +45,10 @@ class SecondProductHalfPriceOffer implements ProductOffer
     private function countHalfPriceProducts(int $productAmount): int
     {
         return intdiv($productAmount, 2);
+    }
+
+    public function getProductCode(): string
+    {
+        return $this->productCode;
     }
 }

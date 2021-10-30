@@ -6,5 +6,6 @@ namespace Acme;
 
 interface ProductOffer
 {
-    public function calculateProductsTotal(array $products): int;
+    public function calculateProductsTotal(array $productAndAmount): int;
+    public function getProductCode(): string;
 }

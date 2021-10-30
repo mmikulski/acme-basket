@@ -25,8 +25,44 @@ class OfferSet
         if (empty($this->offers)) {
             throw new NoApplicableOfferException();
         }
-        $offer = $this->offers[0];
-        assert($offer instanceof ProductOffer);
-        return $offer->calculateProductsTotal($products);
+
+        $productsTotal = 0;
+
+        $productsAndAmounts = $this->productsAndAmountsByKey($products);
+
+        foreach ($productsAndAmounts as $productCode => $productAndAmount) {
+            $productOffer = $this->getOfferByProductKey($productCode);
+            $productsTotal += $productOffer->calculateProductsTotal($productAndAmount);
+        }
+
+        return $productsTotal;
+    }
+
+    private function productsAndAmountsByKey(array $products): array
+    {
+        $productAmounts = [];
+
+        foreach ($products as $product) {
+            $code = $product->getCode();
+            if (isset($productAmounts[$code])) {
+                $productAmounts[$code] = [$product, $productAmounts[$code][1] + 1];
+            } else {
+                $productAmounts[$code] = [$product, 1];
+            }
+        }
+
+        return $productAmounts;
+    }
+
+    private function getOfferByProductKey(string $productCode): ProductOffer
+    {
+        foreach ($this->offers as $offer) {
+            assert($offer instanceof ProductOffer);
+            if ($offer->getProductCode() === $productCode) {
+                return $offer;
+            }
+        }
+
+        return new NullOffer($productCode);
     }
 }
